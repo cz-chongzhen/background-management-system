@@ -1,0 +1,52 @@
+html {
+  @media screen and (min-width: 1920px) {
+    font-size: 16px;
+  }
+  @media screen and (min-width: 1441px) and (max-width: 1919px) {
+    font-size: 14px;
+  }
+  @media screen and (min-width: 1200px) and (max-width: 1440px) {
+    font-size: 14px;
+  }
+}
+
+body {
+  font-family: SourceHanSansCN-Normal, SourceHanSansCN !important;
+  font-size: 14px;
+  color: #fff;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+}
+
+/*清除浮动*/
+.clearfix:after {
+  display: block;
+  clear: both;
+  visibility: hidden;
+  height: 0;
+  line-height: 0;
+  content: '';
+}
+
+.clearfix {
+  zoom: 1;
+}
+
+ul, li {
+  padding: 0;
+  margin: 0;
+  list-style: none
+}
+
+.fl {
+  float: left;
+}
+
+.fr {
+  float: right;
+}

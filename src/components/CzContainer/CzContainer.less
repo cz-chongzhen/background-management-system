@@ -1,0 +1,58 @@
+@import "../../../src/assets/less/contants";
+
+.cz-czContainer {
+  width: 100vw;
+  height: 100vh;
+  background-color: @bgColor;
+
+  > .cz-body-wrapper {
+    width: 100%;
+    height: 100 - (7000vh / @UIHeight);
+
+    > .cz-leftNavWrapper {
+      width: 15%;
+      height: 100%;
+      position: relative;
+      transition: all .3s;
+
+      > .collapseBtn {
+        position: absolute;
+        height: 55px;
+        width: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        right: -12px;
+        cursor: pointer;
+        z-index: 999;
+        text-align: center;
+
+        border-right: 0 solid transparent;
+        border-left: 8px solid #1da57a;
+        border-top: 10px solid transparent;
+        border-bottom: 10px solid transparent;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        > .collapse_icon {
+          margin-left: -14px;
+          font-size: 14px;
+          color: #fff;
+        }
+      }
+    }
+
+    > .cz-rightContentWrapper {
+      width: 85%;
+      height: 100%;
+      transition: all .3s;
+
+      > div {
+        width: 100%;
+        height: 100%;
+        padding: 16px;
+      }
+    }
+
+  }
+}

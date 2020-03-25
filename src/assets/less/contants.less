@@ -1,0 +1,29 @@
+@bgColor: #f6f6f6; // 页面背景色
+@UIWidth: 1920; // UI设计稿的宽
+@UIHeight: 1080; // UI设计稿的高
+
+//获取元素宽度的函数
+.width(@width) {
+  width: @width / @UIWidth * 100vw;
+}
+
+//获取元素高度的函数
+.height(@height) {
+  height: @height / @UIHeight * 100vh;
+}
+
+//垂直居中函数
+.lineHeight(@height) {
+  line-height: @height / @UIHeight * 100vh;
+}
+
+//获取字体大小函数
+.fontSize(@fontSize) {
+  font-size: @fontSize/16 * 1rem;
+}
+
+@textColor: #6E7986;
+@titleColor: #3D454E;
+@textColorSelected: #49B0FF;
+
+

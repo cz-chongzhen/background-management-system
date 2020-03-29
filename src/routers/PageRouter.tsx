@@ -6,8 +6,8 @@ import Home from "../pages/Home/Home";
 const PageRouter: React.FC<any> = () => (
     <CzContainer>
         <Switch>
-            <Route exact path="/" component={Home}/>
-            <Route path="/home" component={Home}/>
+            <Route exact path="/page" component={Home}/>
+            <Route path="/page/home" component={Home}/>
         </Switch>
     </CzContainer>
 );

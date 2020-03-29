@@ -3,7 +3,7 @@ import "./Login.less";
 // import CzTable from "../../components/CzTable/CzTable";
 // import {Spin} from "antd";
 
-const Login: React.FC = () => {
+const Login: React.FC<{}> = () => {
     return (
         <div className="cz-czLogin">
             <div className="loginWrapper">

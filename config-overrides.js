@@ -17,7 +17,6 @@ module.exports = override(
     }),
     (config, env) => {
         config = rewireReactHotLoader(config, env);
-        console.log(config, 'webpack的配置')
         return config;
     }
 );

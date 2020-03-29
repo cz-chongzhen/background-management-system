@@ -3,6 +3,25 @@
 .cz-czHeader {
   width: 100%;
   height: 7000vh / @UIHeight;
-  background-color: #000;
+  background-color: #323436;
   color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  > .header-left {
+    padding-left: 1600vw / @UIWidth;
+    display: flex;
+    justify-content: center;
+    > .logoWrapper {
+
+    }
+
+    > .organization {
+      .fontSize(22)
+    }
+  }
+
+  > .header-right {
+  }
 }

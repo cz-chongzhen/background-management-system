@@ -1,8 +1,12 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Button} from "antd";
 import CzModal from "../../components/CzModal/CzModal";
+import {useHistory} from "react-router-dom";
+import "./Home.less";
 
 const Home: React.FC<{}> = () => {
+
+    const history = useHistory();
 
     const handleOk = (): void => {
         setModalProps(state => ({
@@ -24,25 +28,20 @@ const Home: React.FC<{}> = () => {
         onCancel: handleCancel
     });
 
+    useEffect(() => {
+        console.log(history.location.state, '传过来的参数')
+    }, []);
 
     return (
         <div className="cz-czHome">
-            <Button onClick={() => {
-                setModalProps(state => ({
-                    ...state,
-                    visible: true
-                }))
-            }}>点击</Button>
-            <CzModal
-                title="系统提示"
-                visible={modalProps.visible}
-                onOk={modalProps.onOk}
-                onCancel={modalProps.onCancel}
-            >
-                <div>
-                    <div>惠思雨</div>
+            <div className="centerWrapper">
+                <div>我的应用</div>
+                <div>个人中心</div>
+                <div onClick={() => {
+                    history.push("/developConfigManage")
+                }}>配置管理
                 </div>
-            </CzModal>
+            </div>
         </div>
     )
 };

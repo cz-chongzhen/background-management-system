@@ -2,12 +2,17 @@ import React from "react";
 import {BrowserRouter, Route, Switch} from 'react-router-dom';
 import {hot} from 'react-hot-loader/root';
 import {Login} from "../pages/Login";
+import Home from "../pages/Home/Home";
+import DevelopConfigManage from "../pages/DevelopConfigManage/DevelopConfigManage";
 import PageRouter from "./PageRouter";
 
 const AppRouter: React.FC<any> = () => (
     <BrowserRouter>
         <Switch>
             <Route exact path="/" component={Login}/>
+            <Route path="/login" component={Login}/>
+            <Route path="/home" component={Home}/>
+            <Route path="/developConfigManage" component={DevelopConfigManage}/>
             <Route path="/page" component={PageRouter}/>
         </Switch>
     </BrowserRouter>

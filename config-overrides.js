@@ -1,5 +1,6 @@
-const {override, fixBabelImports, addLessLoader, addWebpackAlias} = require('customize-cra');
+const {override, fixBabelImports, addLessLoader, addWebpackAlias, addWebpackPlugin} = require('customize-cra');
 const rewireReactHotLoader = require('react-app-rewire-hot-loader');
+const AntdDayjsWebpackPlugin = require('antd-dayjs-webpack-plugin');
 
 const path = require("path");
 module.exports = override(
@@ -15,6 +16,9 @@ module.exports = override(
     addWebpackAlias({
         "@assets": path.resolve(__dirname, "./src/assets"),
     }),
+    addWebpackPlugin(
+        new AntdDayjsWebpackPlugin()
+    ),
     (config, env) => {
         config = rewireReactHotLoader(config, env);
         return config;

@@ -5,6 +5,7 @@ import {Login} from "../pages/Login";
 import Home from "../pages/Home/Home";
 import DevelopConfigManage from "../pages/DevelopConfigManage/DevelopConfigManage";
 import PageRouter from "./PageRouter";
+import Register from "../pages/Register/Register";
 
 const AppRouter: React.FC<any> = () => (
     <BrowserRouter>
@@ -12,6 +13,7 @@ const AppRouter: React.FC<any> = () => (
             <Route exact path="/" component={Login}/>
             <Route path="/login" component={Login}/>
             <Route path="/home" component={Home}/>
+            <Route path="/register" component={Register}/>
             <Route path="/developConfigManage" component={DevelopConfigManage}/>
             <Route path="/page" component={PageRouter}/>
         </Switch>

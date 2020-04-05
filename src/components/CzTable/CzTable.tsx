@@ -5,7 +5,6 @@ import {Resizable} from "react-resizable";
 import {SpinProps} from "antd/lib/spin";
 import {GetPopupContainer, TableLocale, TablePaginationConfig} from "antd/lib/table/interface";
 import {ColumnProps} from 'antd/es/table';
-import {useMediaQuery} from "react-responsive";
 
 interface ITableTitleProps {
     onResize: () => void,
@@ -90,9 +89,7 @@ const CzTable: React.FC<ICzTableProps> = (props) => {
         rowClassName,
         rowKey,
         rowSelection,
-        scroll,
         showHeader,
-        size,
         summary,
         title,
         onChange,
@@ -102,29 +99,8 @@ const CzTable: React.FC<ICzTableProps> = (props) => {
         sortDirections
     } = props;
 
-    const _1920 = useMediaQuery({minWidth: 1920});
-
-    const _1600 = useMediaQuery({minWidth: 1600, maxWidth: 1919});
-
-    const _1200 = useMediaQuery({minWidth: 1200, maxWidth: 1559});
-
-    let tableSize: SizeType;
-
-    if (size) {
-        tableSize = size;
-    } else {
-        if (_1920) {
-            tableSize = "large";
-        }
-        if (_1600) {
-            tableSize = "middle";
-        }
-        if (_1200) {
-            tableSize = "small";
-        }
-    }
-
     const [columns, setColumns] = useState([] as ColumnProps<any>[]);
+    const [tableY, setTableY] = useState(300);
 
     useEffect(() => {
         const {columns} = props;
@@ -132,6 +108,13 @@ const CzTable: React.FC<ICzTableProps> = (props) => {
             setColumns(columns);
         }
     }, [props.columns]);
+
+
+    useEffect(() => {
+        const tableDom: any = document.getElementsByClassName("cz-czTable")[0];
+        const tableContent: number = tableDom.offsetHeight - 40 - 57;
+        setTableY(tableContent);
+    }, []);
 
     const handleResize = (index: number) => (e: Event, param: any) => {
         const {size} = param;
@@ -226,15 +209,33 @@ const CzTable: React.FC<ICzTableProps> = (props) => {
             dataSource={dataSource}
             expandable={expandable}
             footer={footer}
-            loading={loading}
+            loading={{
+                spinning: loading,
+                tip: "加载中，请稍候...",
+                size: "large"
+            } as SpinProps}
             locale={locale}
-            pagination={pagination}
+            pagination={pagination ? Object.assign(pagination, {
+                pageSizeOptions: ['10', '20', '50', '100'],
+                showSizeChanger: true,
+                showTotal: (total: number, range: number[]): React.ReactElement => {
+                    return (
+                        <div>
+                            合计：<span style={{color: "#49b0ff"}}>{total}</span> 条
+                        </div>
+                    )
+                },
+                total: dataSource.length
+            }) : false}
             rowClassName={rowClassName}
             rowKey={rowKey}
             rowSelection={rowSelection}
-            scroll={scroll}
+            scroll={{
+                x: "max-content",
+                y: tableY,
+                scrollToFirstRowOnChange: true,
+            }}
             showHeader={showHeader}
-            size={tableSize}
             summary={summary}
             title={title}
             onChange={onChange}

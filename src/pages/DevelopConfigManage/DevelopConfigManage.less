@@ -1,3 +1,43 @@
 .cz-developConfigManage {
+  width: 100%;
+  height: 100%;
+  padding: 16px;
 
+  > .left-content {
+    width: 15%;
+    height: 100%;
+    position: relative;
+    border-right: 1px solid #ccc;
+
+    > .czTreeNode-right-menu {
+      position: absolute;
+      width: 100px;
+      max-height: 80px;
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
+      padding: 10px 0;
+
+      > .czTreeNode-right-menu-item {
+        cursor: pointer;
+        padding: 0 10px;
+      }
+
+      > .czTreeNode-right-menu-item:hover {
+        background-color: #49B0FF;
+        color: #fff;
+      }
+    }
+  }
+
+  > .right-content {
+    width: 85%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    > .tableWrapper {
+      flex: 1;
+    }
+  }
 }

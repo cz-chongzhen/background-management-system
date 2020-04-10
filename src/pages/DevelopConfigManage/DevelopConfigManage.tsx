@@ -1,12 +1,45 @@
 import React, {useEffect, useMemo, useState, CSSProperties} from "react";
-import {Tree, Button} from "antd";
-import {ITreeDataProps, ITreeNodeMenuItemProps, ITableProps} from "./types";
+import {Tree, Button, Form, InputNumber, Input} from "antd";
+import {ITreeDataProps, ITreeNodeMenuItemProps, ITableProps, ITableData, EditableCellProps} from "./types";
 import "./DevelopConfigManage.less";
 import CzTable from "../../components/CzTable/CzTable";
-import {ITableData} from "./types";
 import {TablePaginationConfig} from "antd/es/table";
 
 const {TreeNode} = Tree;
+
+const EditableCell: React.FC<EditableCellProps> = ({
+                                                       editing,
+                                                       dataIndex,
+                                                       title,
+                                                       inputType,
+                                                       record,
+                                                       index,
+                                                       children,
+                                                       ...restProps
+                                                   }) => {
+    const inputNode = inputType === 'number' ? <InputNumber/> : <Input/>;
+
+    return (
+        <td {...restProps}>
+            {editing ? (
+                <Form.Item
+                    name={dataIndex}
+                    style={{margin: 0}}
+                    rules={[
+                        {
+                            required: true,
+                            message: `Please Input ${title}!`,
+                        },
+                    ]}
+                >
+                    {inputNode}
+                </Form.Item>
+            ) : (
+                children
+            )}
+        </td>
+    );
+};
 
 const DevelopConfigManage: React.FC<any> = () => {
 
@@ -29,27 +62,47 @@ const DevelopConfigManage: React.FC<any> = () => {
             {
                 dataIndex: 'name',
                 title: '字段名',
-                width: 160
+                width: 160,
+                editable: true,
             },
             {
                 dataIndex: "typeName",
                 title: "字段类型",
-                width: 160
+                width: 160,
+                editable: true,
             },
             {
                 dataIndex: "length",
                 title: "字段长度",
-                width: 160
+                width: 160,
+                editable: true,
             },
             {
                 dataIndex: "isNull",
                 title: "是否为空",
-                width: 160
+                width: 160,
+                editable: true,
             },
             {
                 dataIndex: "remark",
                 title: "字段描述",
-                width: 160
+                width: 160,
+                editable: true,
+            },
+            {
+                dataIndex: "operation",
+                title: "操作",
+                render: (_: any, record: ITableData) => {
+                    const editable = isEditing(record);
+                    return editable ?
+                        <Button type="primary" onClick={() => {
+                            save(record.key)
+                        }}>保存</Button>
+                        :
+                        <Button onClick={() => {
+                            edit(record)
+                        }}>编辑</Button>
+                }
             }
         ],
         dataSource: [],
@@ -59,6 +112,9 @@ const DevelopConfigManage: React.FC<any> = () => {
         },
         loading: true
     });
+
+    const [form] = Form.useForm();
+    const [editingKey, setEditingKey] = useState('');
 
     useEffect(() => {
         const data: Array<ITreeDataProps> = [
@@ -234,7 +290,7 @@ const DevelopConfigManage: React.FC<any> = () => {
                 length: 255,
                 isNull: "0",
                 remark: "",
-                key: i + 1,
+                key: (i + 1).toString(),
                 index: i + 1,
             })
         }
@@ -250,6 +306,59 @@ const DevelopConfigManage: React.FC<any> = () => {
             handleGetTableData();
         }, 1000)
     }, [tableProps.paginationProps]);
+
+    const isEditing = (record: ITableData): boolean => record.key === editingKey;
+
+    const edit = (record: ITableData) => {
+        form.setFieldsValue({...record});
+        setEditingKey(record.key);
+    };
+
+    const save = async (key: React.Key) => {
+        try {
+            const row = (await form.validateFields()) as ITableData;
+
+            const newData = [...tableProps.dataSource];
+            const index = newData.findIndex(item => key === item.key);
+            if (index > -1) {
+                const item = newData[index];
+                newData.splice(index, 1, {
+                    ...item,
+                    ...row,
+                });
+                setTableProps(state => ({
+                    ...state,
+                    dataSource: newData
+                }))
+                setEditingKey('');
+            } else {
+                newData.push(row);
+                setTableProps(state => ({
+                    ...state,
+                    dataSource: newData
+                }))
+                setEditingKey('');
+            }
+        } catch (errInfo) {
+            console.log('Validate Failed:', errInfo);
+        }
+    };
+
+    const mergedColumns = tableProps.columns.map(col => {
+        if (!col.editable) {
+            return col;
+        }
+        return {
+            ...col,
+            onCell: (record: ITableData) => ({
+                record,
+                inputType: col.dataIndex === 'age' ? 'number' : 'text',
+                dataIndex: col.dataIndex,
+                title: col.title,
+                editing: isEditing(record),
+            }),
+        };
+    });
 
 
     return (
@@ -273,17 +382,24 @@ const DevelopConfigManage: React.FC<any> = () => {
             </div>
             <div className="right-content fr">
                 <div className="tableWrapper">
-                    <CzTable
-                        columns={tableProps.columns}
-                        dataSource={tableProps.dataSource}
-                        pagination={{
-                            current: tableProps.paginationProps.current,
-                            pageSize: tableProps.paginationProps.pageSize,
-                            onChange: pageOnChange,
-                            onShowSizeChange: onShowSizeChange,
-                        } as TablePaginationConfig}
-                        loading={tableProps.loading}
-                    />
+                    <Form form={form} component={false}>
+                        <CzTable
+                            columns={mergedColumns}
+                            dataSource={tableProps.dataSource}
+                            pagination={{
+                                current: tableProps.paginationProps.current,
+                                pageSize: tableProps.paginationProps.pageSize,
+                                onChange: pageOnChange,
+                                onShowSizeChange: onShowSizeChange,
+                            } as TablePaginationConfig}
+                            loading={tableProps.loading}
+                            components={{
+                                body: {
+                                    cell: EditableCell,
+                                },
+                            }}
+                        />
+                    </Form>
                 </div>
             </div>
         </div>

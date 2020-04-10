@@ -69,7 +69,7 @@ interface ICzTableProps {
     sortDirections?: SortOrder[];
 }
 
-const components: any = {
+const componentsResizeColumns: any = {
     header: {
         cell: ResizeableTitle,
     },
@@ -96,7 +96,8 @@ const CzTable: React.FC<ICzTableProps> = (props) => {
         onHeaderRow,
         onRow,
         getPopupContainer,
-        sortDirections
+        sortDirections,
+        components
     } = props;
 
     const [columns, setColumns] = useState([] as ColumnProps<any>[]);
@@ -205,7 +206,7 @@ const CzTable: React.FC<ICzTableProps> = (props) => {
             bordered={bordered ? bordered : false}
             // @ts-ignore
             columns={tableColumns}
-            components={components}
+            components={components ? Object.assign(components, componentsResizeColumns) : componentsResizeColumns}
             dataSource={dataSource}
             expandable={expandable}
             footer={footer}

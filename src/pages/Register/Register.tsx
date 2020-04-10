@@ -1,13 +1,21 @@
 import React from "react";
 import "./Register.less";
 import {Form, Input, Button} from "antd";
+import {czRegister} from "../../service/commonApi";
 
 const FormItem = Form.Item;
 
 const Register: React.FC = () => {
 
-    const onRegister = (values: any): void => {
+    const onRegister = async (values: any): Promise<void> => {
         console.log(values)
+        const reqBody = {
+            userName: values.userName,
+            passWord: values.passWord,
+            mobile: values.mobile,
+        };
+        const data = await czRegister(reqBody);
+        console.log(data, '注册接口返回的结果')
     };
 
     const layout = {

@@ -20,12 +20,12 @@ const Login: React.FC<{}> = () => {
      * 登录按钮点击事件
      */
     const onFinish = async (values: any): Promise<void> => {
-        // const data = await czLogin(values);
-        // console.log(data, '哈哈哈')
-        // setSpinProps(state => ({
-        //     ...state,
-        //     spinning: true
-        // }))
+        const data = await czLogin(values);
+        console.log(data, '哈哈哈')
+        setSpinProps(state => ({
+            ...state,
+            spinning: true
+        }))
         history.push("/home", {value: "惠思雨"})
     };
 

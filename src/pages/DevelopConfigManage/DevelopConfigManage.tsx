@@ -6,14 +6,16 @@ import {
     ITableProps,
     ITableData,
     EditableCellProps,
-    ICreateTableModalProps
+    ICreateTableModalProps,
+    IAllOptionsProps
 } from "./types";
 import "./DevelopConfigManage.less";
 import CzTable from "../../components/CzTable/CzTable";
 import {TablePaginationConfig} from "antd/es/table";
-import {getFiledDataType} from "../../service/commonApi";
+import {getFiledDataType, getAllTable, getTableAllFieldById} from "../../service/commonApi";
 import CzModal from "../../components/CzModal/CzModal";
 import CreateTableForm from "./components/CreateTableForm";
+import {czArrayRepeatByKey} from "../../utils/CzUtils";
 
 const {TreeNode} = Tree;
 const {Option} = Select;
@@ -29,7 +31,7 @@ const EditableCell: React.FC<EditableCellProps> = ({inputNode, editing, dataInde
 const DevelopConfigManage: React.FC<any> = () => {
     const [menuTreeData, setMenuTreeData] = useState<Array<ITreeDataProps>>([]);
     const [selectedTreeKeys, setSelectedTreeKeys] = useState<Array<string>>([]);
-    const [expandedTreeKeys, setExpandedTreeKeys] = useState<Array<string>>([]);
+    const [expandedTreeKeys, setExpandedTreeKeys] = useState<Array<string>>(["table"]);
     const [rightClickTreeNodeMenuItemProps, setRightClickTreeNodeMenuItemProps] = useState<ITreeNodeMenuItemProps>({
         pageX: 0,
         pageY: 0,
@@ -49,6 +51,9 @@ const DevelopConfigManage: React.FC<any> = () => {
         title: "新建表",
         visible: false
     });
+    const [allOptions, setAllOptions] = useState<IAllOptionsProps>({
+        dataTypeOptions: []
+    });
 
     const createTableModalOk = () => {
         setCreateTableModalProps(state => ({
@@ -66,31 +71,37 @@ const DevelopConfigManage: React.FC<any> = () => {
     const [form] = Form.useForm();
 
     useEffect(() => {
+        getAllDataTypeOptions();
+        getAllTableData();
+    }, []);
+
+    const getAllTableData = async (): Promise<void> => {
+        const value = await getAllTable();
+        const menuData = value.map((item: any) => ({
+            key: item.id,
+            title: item.name
+        }));
+        const newMenuData = czArrayRepeatByKey(menuData, 'key');
         const data: Array<ITreeDataProps> = [
             {
                 title: '表',
                 key: "table",
-                children: [
-                    {
-                        title: 'users',
-                        key: 'users',
-                    },
-                ]
+                children: newMenuData
             }
         ];
-
         setMenuTreeData(data);
-
-        getAllDataTypeOptions();
-    }, []);
+    };
 
 
     /**
      * 获取字段所有数据类型
      */
     const getAllDataTypeOptions = async (): Promise<void> => {
-        // const data = await getFiledDataType();
-        // console.log(data, '所有的数据类型')
+        const data = await getFiledDataType();
+        setAllOptions(state => ({
+            ...state,
+            dataTypeOptions: data
+        }))
     };
 
     /**
@@ -98,8 +109,14 @@ const DevelopConfigManage: React.FC<any> = () => {
      * @param selectedKeys
      * @param info
      */
-    const onSelect = (selectedKeys: Array<any>, info: any) => {
-        setSelectedTreeKeys(selectedKeys);
+    const onSelect = async (selectedKeys: Array<any>, info: any): Promise<void> => {
+        try {
+            setSelectedTreeKeys(selectedKeys);
+            const res = await getTableAllFieldById(selectedKeys[0]);
+            console.log(res, '返回选中表的所有字段')
+        } catch (e) {
+            console.error(e, '获取表字段方法')
+        }
     };
 
     /**
@@ -367,7 +384,11 @@ const DevelopConfigManage: React.FC<any> = () => {
                     ]}
                 >
                     <Select>
-                        <Option value={"varchar"}>varchar</Option>
+                        {
+                            allOptions.dataTypeOptions.map(item => (
+                                <Option key={item.value} value={item.label}>{item.label}</Option>
+                            ))
+                        }
                     </Select>
                 </Form.Item>
             )

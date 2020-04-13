@@ -51,3 +51,12 @@ export interface ICreateTableModalProps {
 export interface ICreateTableFormProps {
     closeModal: () => void
 }
+
+export interface IOptions {
+    value: string;
+    label: string;
+}
+
+export interface IAllOptionsProps {
+    dataTypeOptions: IOptions[]
+}

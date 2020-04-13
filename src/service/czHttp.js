@@ -1,8 +1,6 @@
 import axios from "axios";
 import {message} from "antd";
 
-const access_token = window.sessionStorage.getItem("access_token");
-
 const czHttp = axios.create({
     timeout: 100000,  // 请求超时的配置
 });
@@ -15,8 +13,8 @@ czHttp.defaults.headers.post['Content-Type'] = 'application/json';
 czHttp.interceptors.request.use(config => {
     // console.log("请求头的配置",config)
     // 在此处可设置请求头
-    if (access_token) {
-        config.headers['Authorization'] = access_token;
+    if (window.sessionStorage.getItem("access_token")) {
+        config.headers['access_token'] = window.sessionStorage.getItem("access_token");
     }
     return config;
 }, error => {
@@ -42,6 +40,7 @@ czHttp.interceptors.response.use(({data, status}) => {
         return false;
     }
 }, error => {
+    console.error(error.response, '调用方法出错了')
     throw new Error(error);
 });
 

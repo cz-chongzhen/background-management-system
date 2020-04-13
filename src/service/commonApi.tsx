@@ -28,4 +28,14 @@ export const getFiledDataType = (): any => czHttp.get(`${commonUrl}/table/queryC
  * 创建表
  * @param reqBody
  */
-export const createTable = (reqBody: ICreateTableProps): any => czHttp.post(`${commonUrl}/createTable`, JSON.stringify(reqBody));
+export const createTable = (reqBody: ICreateTableProps): any => czHttp.post(`${commonUrl}/table/createTable`, JSON.stringify(reqBody));
+
+/**
+ * 获取所有的表
+ */
+export const getAllTable = (): any => czHttp.get(`${commonUrl}/table/queryTables`);
+
+/**
+ * 获取表所有的字段通过表的ID
+ */
+export const getTableAllFieldById = (tableId: number): any => czHttp.get(`${commonUrl}/table/queryTableField/${tableId}`);

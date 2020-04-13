@@ -1,48 +1,32 @@
 import React, {useEffect, useMemo, useState, CSSProperties} from "react";
-import {Tree, Button, Form, InputNumber, Input} from "antd";
-import {ITreeDataProps, ITreeNodeMenuItemProps, ITableProps, ITableData, EditableCellProps} from "./types";
+import {Tree, Button, Form, InputNumber, Input, Select} from "antd";
+import {
+    ITreeDataProps,
+    ITreeNodeMenuItemProps,
+    ITableProps,
+    ITableData,
+    EditableCellProps,
+    ICreateTableModalProps
+} from "./types";
 import "./DevelopConfigManage.less";
 import CzTable from "../../components/CzTable/CzTable";
 import {TablePaginationConfig} from "antd/es/table";
+import {getFiledDataType} from "../../service/commonApi";
+import CzModal from "../../components/CzModal/CzModal";
+import CreateTableForm from "./components/CreateTableForm";
 
 const {TreeNode} = Tree;
+const {Option} = Select;
 
-const EditableCell: React.FC<EditableCellProps> = ({
-                                                       editing,
-                                                       dataIndex,
-                                                       title,
-                                                       inputType,
-                                                       record,
-                                                       index,
-                                                       children,
-                                                       ...restProps
-                                                   }) => {
-    const inputNode = inputType === 'number' ? <InputNumber/> : <Input/>;
-
+const EditableCell: React.FC<EditableCellProps> = ({inputNode, editing, dataIndex, title, inputType, record, index, children, ...restProps}) => {
     return (
         <td {...restProps}>
-            {editing ? (
-                <Form.Item
-                    name={dataIndex}
-                    style={{margin: 0}}
-                    rules={[
-                        {
-                            required: true,
-                            message: `Please Input ${title}!`,
-                        },
-                    ]}
-                >
-                    {inputNode}
-                </Form.Item>
-            ) : (
-                children
-            )}
+            {editing ? inputNode : children}
         </td>
     );
 };
 
 const DevelopConfigManage: React.FC<any> = () => {
-
     const [menuTreeData, setMenuTreeData] = useState<Array<ITreeDataProps>>([]);
     const [selectedTreeKeys, setSelectedTreeKeys] = useState<Array<string>>([]);
     const [expandedTreeKeys, setExpandedTreeKeys] = useState<Array<string>>([]);
@@ -52,69 +36,34 @@ const DevelopConfigManage: React.FC<any> = () => {
         id: "",
         isLeaf: false
     });
+    const [editingKey, setEditingKey] = useState<string>('');
     const [tableProps, setTableProps] = useState<ITableProps>({
-        columns: [
-            {
-                dataIndex: "index",
-                title: "序号",
-                width: 80
-            },
-            {
-                dataIndex: 'name',
-                title: '字段名',
-                width: 160,
-                editable: true,
-            },
-            {
-                dataIndex: "typeName",
-                title: "字段类型",
-                width: 160,
-                editable: true,
-            },
-            {
-                dataIndex: "length",
-                title: "字段长度",
-                width: 160,
-                editable: true,
-            },
-            {
-                dataIndex: "isNull",
-                title: "是否为空",
-                width: 160,
-                editable: true,
-            },
-            {
-                dataIndex: "remark",
-                title: "字段描述",
-                width: 160,
-                editable: true,
-            },
-            {
-                dataIndex: "operation",
-                title: "操作",
-                render: (_: any, record: ITableData) => {
-                    const editable = isEditing(record);
-                    return editable ?
-                        <Button type="primary" onClick={() => {
-                            save(record.key)
-                        }}>保存</Button>
-                        :
-                        <Button onClick={() => {
-                            edit(record)
-                        }}>编辑</Button>
-                }
-            }
-        ],
-        dataSource: [],
+        dataSource: [] as ITableData[],
         paginationProps: {
             current: 1,
             pageSize: 10,
         },
         loading: true
     });
+    const [createTableModalProps, setCreateTableModalProps] = useState<ICreateTableModalProps>({
+        title: "新建表",
+        visible: false
+    });
+
+    const createTableModalOk = () => {
+        setCreateTableModalProps(state => ({
+            ...state,
+            visible: false
+        }))
+    };
+    const createTableModalCancel = () => {
+        setCreateTableModalProps(state => ({
+            ...state,
+            visible: false
+        }))
+    };
 
     const [form] = Form.useForm();
-    const [editingKey, setEditingKey] = useState('');
 
     useEffect(() => {
         const data: Array<ITreeDataProps> = [
@@ -131,7 +80,18 @@ const DevelopConfigManage: React.FC<any> = () => {
         ];
 
         setMenuTreeData(data);
+
+        getAllDataTypeOptions();
     }, []);
+
+
+    /**
+     * 获取字段所有数据类型
+     */
+    const getAllDataTypeOptions = async (): Promise<void> => {
+        // const data = await getFiledDataType();
+        // console.log(data, '所有的数据类型')
+    };
 
     /**
      * 树节点选中事件
@@ -199,7 +159,11 @@ const DevelopConfigManage: React.FC<any> = () => {
      * 创建表
      */
     const createTable = () => {
-        console.log("创建表")
+        clearRightMenu();
+        setCreateTableModalProps(state => ({
+            ...state,
+            visible: true
+        }))
     };
 
     /**
@@ -283,13 +247,13 @@ const DevelopConfigManage: React.FC<any> = () => {
      */
     const handleGetTableData = (): void => {
         const dataArr: ITableData[] = [];
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 1; i++) {
             dataArr.push({
-                name: "id",
-                typeName: "string",
+                fieldName: "id",
+                dataType: "varchar",
                 length: 255,
-                isNull: "0",
-                remark: "",
+                isNull: "是",
+                remark: "哈哈哈哈",
                 key: (i + 1).toString(),
                 index: i + 1,
             })
@@ -307,20 +271,36 @@ const DevelopConfigManage: React.FC<any> = () => {
         }, 1000)
     }, [tableProps.paginationProps]);
 
-    const isEditing = (record: ITableData): boolean => record.key === editingKey;
+    /**
+     * 行是否处于编辑状态
+     * @param record
+     */
+    const isEditing = (record: ITableData): boolean => {
+        return record.key === editingKey;
+    };
 
-    const edit = (record: ITableData) => {
+    /**
+     * 编辑按钮
+     * @param record
+     */
+    const editRow = (record: ITableData) => {
         form.setFieldsValue({...record});
         setEditingKey(record.key);
     };
 
-    const save = async (key: React.Key) => {
+    /**
+     * 保存按钮
+     * @param key
+     */
+    const saveRow = async (key: React.Key): Promise<void> => {
         try {
             const row = (await form.validateFields()) as ITableData;
 
+            console.log(row, '保存的行数据')
+
             const newData = [...tableProps.dataSource];
             const index = newData.findIndex(item => key === item.key);
-            if (index > -1) {
+            if (index > -1) { // 替换
                 const item = newData[index];
                 newData.splice(index, 1, {
                     ...item,
@@ -331,7 +311,7 @@ const DevelopConfigManage: React.FC<any> = () => {
                     dataSource: newData
                 }))
                 setEditingKey('');
-            } else {
+            } else { //新增
                 newData.push(row);
                 setTableProps(state => ({
                     ...state,
@@ -344,7 +324,132 @@ const DevelopConfigManage: React.FC<any> = () => {
         }
     };
 
-    const mergedColumns = tableProps.columns.map(col => {
+    const columns = [
+        {
+            dataIndex: "index",
+            title: "序号",
+            width: 80,
+        },
+        {
+            dataIndex: 'fieldName',
+            title: '字段名',
+            width: 160,
+            editable: true,
+            inputNode: (
+                <Form.Item
+                    name="fieldName"
+                    style={{margin: 0}}
+                    rules={[
+                        {
+                            required: true,
+                            message: `请输入字段名!`,
+                        },
+                    ]}
+                >
+                    <Input/>
+                </Form.Item>
+            )
+        },
+        {
+            dataIndex: "dataType",
+            title: "字段类型",
+            width: 160,
+            editable: true,
+            inputNode: (
+                <Form.Item
+                    name="dataType"
+                    style={{margin: 0}}
+                    rules={[
+                        {
+                            required: true,
+                            message: `请选择字段类型!`,
+                        },
+                    ]}
+                >
+                    <Select>
+                        <Option value={"varchar"}>varchar</Option>
+                    </Select>
+                </Form.Item>
+            )
+        },
+        {
+            dataIndex: "length",
+            title: "字段长度",
+            width: 160,
+            editable: true,
+            inputNode: (
+                <Form.Item
+                    name="length"
+                    style={{margin: 0}}
+                    rules={[
+                        {
+                            required: true,
+                            message: `请输入字段长度!`,
+                        },
+                    ]}
+                >
+                    <InputNumber/>
+                </Form.Item>
+            )
+        },
+        {
+            dataIndex: "isNull",
+            title: "是否为空",
+            width: 160,
+            editable: true,
+            inputNode: (
+                <Form.Item
+                    name="isNull"
+                    style={{margin: 0}}
+                    rules={[
+                        {
+                            required: true,
+                            message: `请选择是否为空!`,
+                        },
+                    ]}
+                >
+                    <Select>
+                        <Option value="否">否</Option>
+                        <Option value="是">是</Option>
+                    </Select>
+                </Form.Item>
+            )
+        },
+        {
+            dataIndex: "remark",
+            title: "字段描述",
+            width: 160,
+            editable: true,
+            inputNode: (
+                <Form.Item
+                    name="remark"
+                    style={{margin: 0}}
+                >
+                    <Input allowClear={true} placeholder="请输入字段描述（选填"/>
+                </Form.Item>
+            )
+        },
+        {
+            dataIndex: "operation",
+            title: "操作",
+            render: (_: any, record: ITableData) => {
+                const editable: boolean = isEditing(record);
+                return editable ?
+                    <Button type="primary" onClick={() => {
+                        saveRow(record.key)
+                    }}>保存</Button>
+                    :
+                    <Button onClick={() => {
+                        editRow(record)
+                    }}>编辑</Button>
+            }
+        }
+    ];
+
+    /**
+     * 合并列配置
+     */
+    const mergedColumns = columns.map(col => {
         if (!col.editable) {
             return col;
         }
@@ -352,7 +457,7 @@ const DevelopConfigManage: React.FC<any> = () => {
             ...col,
             onCell: (record: ITableData) => ({
                 record,
-                inputType: col.dataIndex === 'age' ? 'number' : 'text',
+                inputNode: col.inputNode,
                 dataIndex: col.dataIndex,
                 title: col.title,
                 editing: isEditing(record),
@@ -402,6 +507,17 @@ const DevelopConfigManage: React.FC<any> = () => {
                     </Form>
                 </div>
             </div>
+            <CzModal
+                title={createTableModalProps.title}
+                visible={createTableModalProps.visible}
+                onCancel={createTableModalCancel}
+                onOk={createTableModalOk}
+                footer={null}
+            >
+                <CreateTableForm
+                    closeModal={createTableModalCancel}
+                />
+            </CzModal>
         </div>
     )
 };

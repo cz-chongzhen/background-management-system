@@ -23,7 +23,6 @@ const Login: React.FC<{}> = () => {
     const onFinish = async (values: any): Promise<void> => {
         try {
             const data = await czLogin(values);
-            console.log(data, '哈哈哈')
 
             if (data) {
                 const {access_token, user} = data;

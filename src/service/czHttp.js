@@ -6,7 +6,7 @@ const czHttp = axios.create({
 
 // 设置post请求头
 // czHttp.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
-
+czHttp.defaults.headers.post['Content-Type'] = 'application/json';
 
 // request 的拦截----自定义相关操作
 czHttp.interceptors.request.use(config => {

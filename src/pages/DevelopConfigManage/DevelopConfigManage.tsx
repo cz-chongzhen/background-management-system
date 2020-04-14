@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState, CSSProperties} from "react";
+import React, {useEffect, useMemo, useState, CSSProperties, Fragment} from "react";
 import {Tree, Button, Form, InputNumber, Input, Select} from "antd";
 import {
     ITreeDataProps,
@@ -460,9 +460,14 @@ const DevelopConfigManage: React.FC<any> = () => {
                         saveRow(record.key)
                     }}>保存</Button>
                     :
-                    <Button onClick={() => {
-                        editRow(record)
-                    }}>编辑</Button>
+                    <Fragment>
+                        <Button onClick={() => {
+                            editRow(record)
+                        }}>编辑</Button>
+                        <Button type="link" onClick={() => {
+                            deleteField(record)
+                        }}>删除</Button>
+                    </Fragment>
             }
         }
     ];
@@ -486,6 +491,56 @@ const DevelopConfigManage: React.FC<any> = () => {
         };
     });
 
+    const deleteField = (record: any): void => {
+        console.log(record)
+        const newData = [...tableProps.dataSource];
+        const data = newData.filter(item => item.key !== record.key);
+        setTableProps(state => ({
+            ...state,
+            dataSource: data
+        }))
+    };
+
+    const addField = (): void => {
+        const newData = [...tableProps.dataSource];
+        newData.push({
+            index: tableProps.dataSource.length + 1,
+            fieldName: "",
+            dataType: "字符串",
+            length: 255,
+            isNull: "是",
+            remark: "",
+            key: (tableProps.dataSource.length + 1).toString()
+        });
+        setTableProps(state => ({
+            ...state,
+            dataSource: newData
+        }));
+        // setEditingKey((tableProps.dataSource.length + 1).toString());
+    };
+
+    const matchDataType = (value: string): string => {
+        const data = allOptions.dataTypeOptions.filter(item => item.label === value);
+        return data[0].value;
+    };
+    const matchIsNull = (value: string): string => {
+        return value === "是" ? "NULL" : "NOT NULL";
+    };
+
+    const saveField = () => {
+
+        const tableData = tableProps.dataSource.map(item => ({
+            ...item,
+            dataType: matchDataType(item.dataType),
+            isNull: matchIsNull(item.isNull),
+        }));
+
+        for (let i = 0; i < tableData.length; i++) {
+            delete tableData[i].key;
+            delete tableData[i].index;
+        }
+        console.log(tableData)
+    };
 
     return (
         <div className="cz-developConfigManage clearfix">
@@ -507,25 +562,37 @@ const DevelopConfigManage: React.FC<any> = () => {
                 {getNodeTreeRightClickMenu}
             </div>
             <div className="right-content fr">
+                <div className="operateArea">
+                    <Button disabled={tableProps.dataSource.length > 0 ? false : true} type="primary"
+                            onClick={saveField}>保存</Button>
+                </div>
                 <div className="tableWrapper">
                     <Form form={form} component={false}>
                         <CzTable
                             columns={mergedColumns}
                             dataSource={tableProps.dataSource}
-                            pagination={{
-                                current: tableProps.paginationProps.current,
-                                pageSize: tableProps.paginationProps.pageSize,
-                                onChange: pageOnChange,
-                                onShowSizeChange: onShowSizeChange,
-                            } as TablePaginationConfig}
+                            // pagination={{
+                            //     current: tableProps.paginationProps.current,
+                            //     pageSize: tableProps.paginationProps.pageSize,
+                            //     onChange: pageOnChange,
+                            //     onShowSizeChange: onShowSizeChange,
+                            // } as TablePaginationConfig}
+                            pagination={false}
                             loading={tableProps.loading}
                             components={{
                                 body: {
                                     cell: EditableCell,
                                 },
                             }}
+                            scroll={{
+                                x: 'max-content',
+                                y: 700,
+                            }}
                         />
                     </Form>
+                </div>
+                <div className="addField">
+                    <Button onClick={addField}>新增字段</Button>
                 </div>
             </div>
             <CzModal
@@ -537,6 +604,7 @@ const DevelopConfigManage: React.FC<any> = () => {
             >
                 <CreateTableForm
                     closeModal={createTableModalCancel}
+                    getAllTableData={getAllTableData}
                 />
             </CzModal>
         </div>

@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {Form, Input, Button, Spin} from "antd";
+import {Form, Input, Button, Spin, message} from "antd";
 import {ICreateTableFormProps} from "../types";
 import {createTable} from "../../../service/commonApi";
 
@@ -7,7 +7,7 @@ const TextArea = Input.TextArea;
 const FormItem = Form.Item;
 
 const CreateTableForm: React.FC<ICreateTableFormProps> = (props) => {
-    const {closeModal} = props;
+    const {closeModal, getAllTableData} = props;
     const [spinProps, setSpinProps] = useState({
         spinning: false,
         tip: "创建中，请稍候..."
@@ -28,8 +28,14 @@ const CreateTableForm: React.FC<ICreateTableFormProps> = (props) => {
             }
         };
         const data = await createTable(reqBody);
-        console.log(data,'创建表')
-        // closeModal();
+        if (data) {
+            message.success("创建表成功")
+            closeModal();
+            getAllTableData();
+        } else {
+            message.error("创建表失败！")
+        }
+
     };
 
     const layout = {

@@ -29,8 +29,8 @@ czHttp.interceptors.response.use(({data, status}) => {
             if (statusCode === 200) { // 说明后端已经正常返回数据
                 return appData ? appData : true;
             } else {
-                message.error(message);
                 console.error(message);
+                message.error(message);
                 return false;
             }
         }

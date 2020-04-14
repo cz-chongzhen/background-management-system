@@ -97,7 +97,8 @@ const CzTable: React.FC<ICzTableProps> = (props) => {
         onRow,
         getPopupContainer,
         sortDirections,
-        components
+        components,
+        scroll
     } = props;
 
     const [columns, setColumns] = useState([] as ColumnProps<any>[]);
@@ -231,7 +232,7 @@ const CzTable: React.FC<ICzTableProps> = (props) => {
             rowClassName={rowClassName}
             rowKey={rowKey}
             rowSelection={rowSelection}
-            scroll={{
+            scroll={scroll ? scroll : {
                 x: "max-content",
                 y: tableY,
                 scrollToFirstRowOnChange: true,

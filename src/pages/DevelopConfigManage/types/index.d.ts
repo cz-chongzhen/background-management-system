@@ -49,7 +49,8 @@ export interface ICreateTableModalProps {
 }
 
 export interface ICreateTableFormProps {
-    closeModal: () => void
+    closeModal: () => void,
+    getAllTableData: () => void,
 }
 
 export interface IOptions {

@@ -18,7 +18,7 @@ czHttp.interceptors.request.use(config => {
     }
     return config;
 }, error => {
-    throw new Error(error);
+    // throw new Error(error);
 });
 
 // response 的拦截----自定义相关操作
@@ -41,7 +41,7 @@ czHttp.interceptors.response.use(({data, status}) => {
     }
 }, error => {
     console.error(error.response, '调用方法出错了')
-    throw new Error(error);
+    // throw new Error(error);
 });
 
 export default czHttp;

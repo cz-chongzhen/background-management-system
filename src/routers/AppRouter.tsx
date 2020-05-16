@@ -6,6 +6,7 @@ import Home from "../pages/Home/Home";
 import DevelopConfigManage from "../pages/DevelopConfigManage/DevelopConfigManage";
 import PageRouter from "./PageRouter";
 import Register from "../pages/Register/Register";
+import EchartsDemo from "../pages/EchartsDemo/EchartsDemo";
 
 const AppRouter: React.FC<any> = () => (
     <BrowserRouter>
@@ -16,6 +17,7 @@ const AppRouter: React.FC<any> = () => (
             <Route path="/register" component={Register}/>
             <Route path="/developConfigManage" component={DevelopConfigManage}/>
             <Route path="/page" component={PageRouter}/>
+            <Route path="/echarts-demo" component={EchartsDemo}/>
         </Switch>
     </BrowserRouter>
 );

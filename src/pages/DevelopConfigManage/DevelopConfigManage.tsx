@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState, CSSProperties, Fragment} from "react";
-import {Tree, Button, Form, InputNumber, Input, Select} from "antd";
+import {Tree, Button, Form, InputNumber, Input, Select, Modal} from "antd";
 import {
     ITreeDataProps,
     ITreeNodeMenuItemProps,
@@ -266,8 +266,8 @@ const DevelopConfigManage: React.FC<any> = () => {
         const dataArr: ITableData[] = [];
         for (let i = 0; i < 1; i++) {
             dataArr.push({
-                fieldName: "id",
-                dataType: "varchar",
+                fieldName: "name",
+                dataType: "字符串",
                 length: 255,
                 isNull: "是",
                 remark: "哈哈哈哈",
@@ -297,10 +297,11 @@ const DevelopConfigManage: React.FC<any> = () => {
     };
 
     /**
-     * 编辑按钮
+     * 编辑字段
      * @param record
      */
-    const editRow = (record: ITableData) => {
+    const editRow = (record: ITableData): void => {
+        console.log(record)
         form.setFieldsValue({...record});
         setEditingKey(record.key);
     };
@@ -446,7 +447,7 @@ const DevelopConfigManage: React.FC<any> = () => {
                     name="remark"
                     style={{margin: 0}}
                 >
-                    <Input allowClear={true} placeholder="请输入字段描述（选填"/>
+                    <Input allowClear={true} placeholder="请输入字段描述（选填）"/>
                 </Form.Item>
             )
         },
@@ -491,19 +492,39 @@ const DevelopConfigManage: React.FC<any> = () => {
         };
     });
 
+    /**
+     * 删除字段
+     * @param record
+     */
     const deleteField = (record: any): void => {
         console.log(record)
-        const newData = [...tableProps.dataSource];
-        const data = newData.filter(item => item.key !== record.key);
-        setTableProps(state => ({
-            ...state,
-            dataSource: data
-        }))
+        Modal.confirm({
+            title: '系统提示',
+            centered: true,
+            content: '确定要删除么？',
+            onOk: () => {
+                const newData = [...tableProps.dataSource];
+                const data = newData.filter(item => item.key !== record.key).map((item, index) => ({
+                    ...item,
+                    index: index + 1
+                }));
+                setTableProps(state => ({
+                    ...state,
+                    dataSource: data
+                }))
+            },
+            onCancel: () => {
+
+            }
+        });
     };
 
+    /**
+     * 新增字段
+     */
     const addField = (): void => {
-        const newData = [...tableProps.dataSource];
-        newData.push({
+        const newData: ITableData[] = [...tableProps.dataSource];
+        const addData: ITableData = {
             index: tableProps.dataSource.length + 1,
             fieldName: "",
             dataType: "字符串",
@@ -511,24 +532,33 @@ const DevelopConfigManage: React.FC<any> = () => {
             isNull: "是",
             remark: "",
             key: (tableProps.dataSource.length + 1).toString()
-        });
+        };
+        newData.push(addData);
         setTableProps(state => ({
             ...state,
             dataSource: newData
         }));
-        // setEditingKey((tableProps.dataSource.length + 1).toString());
+        editRow(addData); // 新增之后立刻编辑新增的字段
     };
 
+    /**
+     * 匹配数据类型
+     * @param value
+     */
     const matchDataType = (value: string): string => {
         const data = allOptions.dataTypeOptions.filter(item => item.label === value);
         return data[0].value;
     };
+
+    /**
+     * 配置是否为空字段
+     * @param value
+     */
     const matchIsNull = (value: string): string => {
         return value === "是" ? "NULL" : "NOT NULL";
     };
 
     const saveField = () => {
-
         const tableData = tableProps.dataSource.map(item => ({
             ...item,
             dataType: matchDataType(item.dataType),
@@ -592,7 +622,7 @@ const DevelopConfigManage: React.FC<any> = () => {
                     </Form>
                 </div>
                 <div className="addField">
-                    <Button onClick={addField}>新增字段</Button>
+                    <Button disabled={editingKey ? true : false} onClick={addField}>新增字段</Button>
                 </div>
             </div>
             <CzModal

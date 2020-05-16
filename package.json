@@ -18,6 +18,8 @@
     "axios": "^0.19.2",
     "dayjs": "^1.8.23",
     "dragm": "^0.0.5",
+    "echarts": "^4.7.0",
+    "echarts-for-react": "^2.0.15-beta.1",
     "react": "^16.13.1",
     "react-contexify": "^4.1.1",
     "react-dom": "^16.13.1",

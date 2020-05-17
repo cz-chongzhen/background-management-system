@@ -1,5 +1,5 @@
 import czHttp from "./czHttp";
-import {ILoginProps, IRegisterProps, ICreateTableProps} from "./interface";
+import {ILoginProps, IRegisterProps, ICreateTableProps, ICreateDataProps, IQueryProps, IDeleteProps} from "./interface";
 
 const userCenterUrl: string = (window as any).urlConfig.userCenterUrl;
 const commonUrl: string = (window as any).urlConfig.commonUrl;
@@ -39,3 +39,21 @@ export const getAllTable = (): any => czHttp.get(`${commonUrl}/table/queryTables
  * 获取表所有的字段通过表的ID
  */
 export const getTableAllFieldById = (tableId: number): any => czHttp.get(`${commonUrl}/table/queryTableField/${tableId}`);
+
+/**
+ * 通用的新增和修改
+ * @param reqBody
+ */
+export const commonCreateData = (reqBody: ICreateDataProps): any => czHttp.post(`${commonUrl}/common/update`, JSON.stringify(reqBody));
+
+/**
+ * 通用的查询方法
+ * @param reqBody
+ */
+export const commonQuery = (reqBody: IQueryProps): any => czHttp.post(`${commonUrl}/common/query`, JSON.stringify(reqBody));
+
+/**
+ * 通用的删除方法
+ * @param reqBody
+ */
+export const commonDelete = (reqBody: IDeleteProps): any => czHttp.post(`${commonUrl}/common/delete`, JSON.stringify(reqBody));

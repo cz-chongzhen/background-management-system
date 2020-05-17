@@ -14,7 +14,7 @@ interface ISysTableProps {
     name: string;
     tableName: string;
     remark?: string;
-    id?:number
+    id?: number
 }
 
 interface ISysTableFieldListProps {
@@ -29,4 +29,25 @@ interface ISysTableFieldListProps {
 export interface ICreateTableProps {
     sysTable: ISysTableProps;
     sysTableFieldList?: ISysTableFieldListProps[];
+}
+
+export interface ICreateDataProps {
+    tableName: string;
+    updateList: any[];
+}
+
+export interface IQueryProps {
+    tableName: string;
+    columns?: string[];
+    conditionColumnsByAnd?: any[];
+    conditionColumnsByOr?: any[];
+}
+
+type deleteProps = {
+    id: number;
+}
+
+export interface IDeleteProps {
+    tableName: string;
+    updateList: deleteProps[]
 }

@@ -21,6 +21,9 @@ module.exports = override(
     ),
     (config, env) => {
         config = rewireReactHotLoader(config, env);
+        if (config.mode === 'production') {
+            config.devtool = "none";
+        }
         return config;
     }
 );

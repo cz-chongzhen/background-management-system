@@ -3,7 +3,7 @@
  * @param fn
  * @param delay
  */
-export const czDebounce = (fn: Function, delay: number = 1000): Function => {
+export const czDebounce = (fn: Function, delay: number = 1000): any => {
     let timer: any;
     return function (this: any) {
         if (timer) {

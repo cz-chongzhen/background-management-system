@@ -6,10 +6,11 @@ import CzHeader from "../CzHeader/CzHeader";
 import {CzNav} from "../CzNav";
 import {IMenuData} from "../CzNav/CzNav";
 import {CaretLeftOutlined, CaretRightOutlined} from "@ant-design/icons/lib";
+import {useHistory} from "react-router-dom";
 
 const CzContainer: React.FC = (props) => {
     const {children} = props;
-
+    const history = useHistory();
     // const [menuData, setMenuData] = useState([] as Array<IMenuData>);
     const [navProps, setNavProps] = useState({
         menuData: [] as Array<IMenuData>,
@@ -25,12 +26,22 @@ const CzContainer: React.FC = (props) => {
     useEffect(() => {
         const data: Array<IMenuData> = [
             {
-                key: "01",
-                name: "组一",
+                key: "basicData",
+                name: "基础数据",
                 children: [
                     {
-                        key: "010",
-                        name: "菜单一",
+                        key: "products",
+                        name: "产品",
+                    }
+                ]
+            },
+            {
+                key: "businessData",
+                name: "业务数据",
+                children: [
+                    {
+                        key: "order",
+                        name: "订单",
                     }
                 ]
             }
@@ -47,6 +58,7 @@ const CzContainer: React.FC = (props) => {
      */
     const menuSelect = (data: any): void => {
         const {selectedKeys} = data;
+        history.push(`/page/${selectedKeys[0]}`);
         setNavProps(state => ({
             ...state,
             selectedKeys

@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState, CSSProperties, Fragment} from "react";
-import {Tree, Button, Form, InputNumber, Input, Select, Modal} from "antd";
+import {Tree, Button, Form, InputNumber, Input, Select, Modal, message} from "antd";
 import {
     ITreeDataProps,
     ITreeNodeMenuItemProps,
@@ -9,6 +9,7 @@ import {
     ICreateTableModalProps,
     IAllOptionsProps
 } from "./types";
+import _ from 'lodash';
 import "./DevelopConfigManage.less";
 import CzTable from "../../components/CzTable/CzTable";
 import {TablePaginationConfig} from "antd/es/table";
@@ -16,6 +17,8 @@ import {getFiledDataType, getAllTable, getTableAllFieldById} from "../../service
 import CzModal from "../../components/CzModal/CzModal";
 import CreateTableForm from "./components/CreateTableForm";
 import {czArrayRepeatByKey} from "../../utils/CzUtils";
+import * as commonApi from "../../service/commonApi";
+import {ICreateTableProps} from "../../service/interface";
 
 const {TreeNode} = Tree;
 const {Option} = Select;
@@ -45,7 +48,7 @@ const DevelopConfigManage: React.FC<any> = () => {
             current: 1,
             pageSize: 10,
         },
-        loading: true
+        loading: false
     });
     const [createTableModalProps, setCreateTableModalProps] = useState<ICreateTableModalProps>({
         title: "新建表",
@@ -77,9 +80,11 @@ const DevelopConfigManage: React.FC<any> = () => {
 
     const getAllTableData = async (): Promise<void> => {
         const value = await getAllTable();
+        console.log(value, '菜单数据源')
         const menuData = value.map((item: any) => ({
             key: item.id,
-            title: item.name
+            title: item.name,
+            tableName: item.tableName
         }));
         const newMenuData = czArrayRepeatByKey(menuData, 'key');
         const data: Array<ITreeDataProps> = [
@@ -111,9 +116,36 @@ const DevelopConfigManage: React.FC<any> = () => {
      */
     const onSelect = async (selectedKeys: Array<any>, info: any): Promise<void> => {
         try {
+            if (selectedKeys.length === 0) {
+                setSelectedTreeKeys(selectedKeys);
+                setTableProps(state => ({
+                    ...state,
+                    dataSource: [] as ITableData[]
+                }));
+                return
+            }
+
+            setTableProps(state => ({
+                ...state,
+                loading: true,
+            }))
             setSelectedTreeKeys(selectedKeys);
             const res = await getTableAllFieldById(selectedKeys[0]);
-            console.log(res, '返回选中表的所有字段')
+
+            if (res) {
+                const tableData: ITableData[] = res.map((item: any, index: number) => ({
+                    ...item,
+                    dataType: allOptions.dataTypeOptions.filter(item0 => item0.value === item.dataType)[0].label,
+                    isNull: item.isNull === "NULL" ? '是' : '否',
+                    index: index + 1,
+                    key: (index + 1).toString()
+                }));
+                setTableProps(state => ({
+                    ...state,
+                    dataSource: tableData,
+                    loading: false
+                }))
+            }
         } catch (e) {
             console.error(e, '获取表字段方法')
         }
@@ -282,11 +314,11 @@ const DevelopConfigManage: React.FC<any> = () => {
         }))
     };
 
-    useEffect(() => {
-        setTimeout(() => {
-            handleGetTableData();
-        }, 1000)
-    }, [tableProps.paginationProps]);
+    // useEffect(() => {
+    //     setTimeout(() => {
+    //         handleGetTableData();
+    //     }, 1000)
+    // }, [tableProps.paginationProps]);
 
     /**
      * 行是否处于编辑状态
@@ -558,7 +590,12 @@ const DevelopConfigManage: React.FC<any> = () => {
         return value === "是" ? "NULL" : "NOT NULL";
     };
 
-    const saveField = () => {
+    /**
+     * 保存表
+     */
+    const saveField = _.debounce(async () => {
+        // @ts-ignore
+        const selectedTable: any = menuTreeData[0].children.filter(item => item.key === Number(selectedTreeKeys[0]));
         const tableData = tableProps.dataSource.map(item => ({
             ...item,
             dataType: matchDataType(item.dataType),
@@ -570,7 +607,24 @@ const DevelopConfigManage: React.FC<any> = () => {
             delete tableData[i].index;
         }
         console.log(tableData)
-    };
+        const reqBody: ICreateTableProps = {
+            sysTable: {
+                name: selectedTable[0].title,
+                tableName: selectedTable[0].tableName,
+                id: Number(selectedTable[0].key)
+            },
+            sysTableFieldList: tableData
+        };
+        console.log(reqBody);
+        const result = await commonApi.createTable(reqBody);
+        console.log("返回的结果", result)
+        if (result) {
+            message.success("保存成功");
+            onSelect(selectedTreeKeys, {})
+        } else {
+            message.error('保存失败')
+        }
+    }, 3000, {leading: true, trailing: false});
 
     return (
         <div className="cz-developConfigManage clearfix">
@@ -592,38 +646,46 @@ const DevelopConfigManage: React.FC<any> = () => {
                 {getNodeTreeRightClickMenu}
             </div>
             <div className="right-content fr">
-                <div className="operateArea">
-                    <Button disabled={tableProps.dataSource.length > 0 ? false : true} type="primary"
-                            onClick={saveField}>保存</Button>
-                </div>
-                <div className="tableWrapper">
-                    <Form form={form} component={false}>
-                        <CzTable
-                            columns={mergedColumns}
-                            dataSource={tableProps.dataSource}
-                            // pagination={{
-                            //     current: tableProps.paginationProps.current,
-                            //     pageSize: tableProps.paginationProps.pageSize,
-                            //     onChange: pageOnChange,
-                            //     onShowSizeChange: onShowSizeChange,
-                            // } as TablePaginationConfig}
-                            pagination={false}
-                            loading={tableProps.loading}
-                            components={{
-                                body: {
-                                    cell: EditableCell,
-                                },
-                            }}
-                            scroll={{
-                                x: 'max-content',
-                                y: 700,
-                            }}
-                        />
-                    </Form>
-                </div>
-                <div className="addField">
-                    <Button disabled={editingKey ? true : false} onClick={addField}>新增字段</Button>
-                </div>
+                {
+                    selectedTreeKeys.length > 0 ?
+                        <Fragment>
+                            <div className="operateArea">
+                                <Button disabled={tableProps.dataSource.length > 0 ? false : true} type="primary"
+                                        onClick={saveField}>保存</Button>
+                            </div>
+                            <div className="tableWrapper">
+                                <Form form={form} component={false}>
+                                    <CzTable
+                                        columns={mergedColumns}
+                                        dataSource={tableProps.dataSource}
+                                        // pagination={{
+                                        //     current: tableProps.paginationProps.current,
+                                        //     pageSize: tableProps.paginationProps.pageSize,
+                                        //     onChange: pageOnChange,
+                                        //     onShowSizeChange: onShowSizeChange,
+                                        // } as TablePaginationConfig}
+                                        pagination={false}
+                                        loading={tableProps.loading}
+                                        components={{
+                                            body: {
+                                                cell: EditableCell,
+                                            },
+                                        }}
+                                        scroll={{
+                                            x: 'max-content',
+                                            y: 700,
+                                        }}
+                                        rowKey={(record: ITableData): string => record.fieldName}
+                                    />
+                                </Form>
+                            </div>
+                            <div className="addField">
+                                <Button disabled={editingKey ? true : false} onClick={addField}>新增字段</Button>
+                            </div>
+                        </Fragment>
+                        :
+                        <div className="right-content-tips">请先选择一个表再进行配置</div>
+                }
             </div>
             <CzModal
                 title={createTableModalProps.title}

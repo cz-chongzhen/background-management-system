@@ -14,6 +14,7 @@ interface ISysTableProps {
     name: string;
     tableName: string;
     remark?: string;
+    id?:number
 }
 
 interface ISysTableFieldListProps {

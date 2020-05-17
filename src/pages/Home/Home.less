@@ -4,8 +4,41 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0,0,0,.7);
-  > .centerWrapper {
+  background-color: rgba(0, 0, 0, .7);
+  flex: 1;
 
+  > .cz-czHome-centerWrapper {
+    width: 52.083vw;
+
+    .cz-czHome-Item {
+      cursor: pointer;
+      width: 20%;
+      padding: 0 1.042vw;
+      > .cz-czHome-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1.481vh;
+        background-color: #424957;
+        color: #fff;
+        border-radius: 5%;
+
+        > .iconWrapper {
+          > .iconfont {
+            font-size: 4rem;
+          }
+        }
+
+        > .text {
+          margin-top: 10px;
+          font-size: 1.375rem;
+        }
+
+        &:hover {
+          box-shadow: 0 0 15px rgba(91, 152, 254, 0.8);
+        }
+      }
+
+    }
   }
 }

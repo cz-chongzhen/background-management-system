@@ -15,7 +15,8 @@ interface ICzNavProps {
 export interface IMenuData {
     key: string,
     name: string,
-    children?: Array<IMenuData>
+    children?: Array<IMenuData>,
+    path?:string;
 }
 
 const CzNav: React.FC<ICzNavProps> = (props: ICzNavProps) => {
@@ -54,6 +55,7 @@ const CzNav: React.FC<ICzNavProps> = (props: ICzNavProps) => {
                 selectedKeys={selectedKeys}
                 onSelect={menuSelect}
                 onOpenChange={menuOnOpenChange}
+                inlineCollapsed={false}
             >
                 {
                     renderMenu(menuData)

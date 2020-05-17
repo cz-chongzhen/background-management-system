@@ -31,7 +31,7 @@ const Login: React.FC<{}> = () => {
                     ...state,
                     spinning: true
                 }));
-                history.push("/home", {value: "惠思雨"})
+                history.push("/basic", {value: "惠思雨"})
             }
 
         } catch (e) {

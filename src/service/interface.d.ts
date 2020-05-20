@@ -49,5 +49,5 @@ type deleteProps = {
 
 export interface IDeleteProps {
     tableName: string;
-    updateList: deleteProps[]
+    deleteList: deleteProps[]
 }

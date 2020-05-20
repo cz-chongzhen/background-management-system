@@ -15,13 +15,14 @@ export interface ITableDataProps {
 export interface IProductsTableProps {
     columns: ColumnProps[];
     dataSource: ITableDataProps[];
-    paginationProps: TablePaginationConfig;
+    paginationProps: boolean;
     loading: boolean;
-    selectedRowKeys?:number[];
+    selectedRowKeys?: number[];
 
 }
 
 export interface IProductsFormModalProps {
     title: string;
     visible: boolean;
+    data: ITableDataProps;
 }

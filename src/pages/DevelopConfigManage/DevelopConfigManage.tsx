@@ -185,11 +185,12 @@ const DevelopConfigManage: React.FC<any> = () => {
     }, [menuTreeData]);
 
     const onRightClick = (e: any): void => {
+        console.log(e.event.pageY)
         if (e.node.children) { // 说明是非叶子节点
             setRightClickTreeNodeMenuItemProps(state => ({
                 ...state,
                 pageX: e.event.pageX,
-                pageY: e.event.pageY,
+                pageY: e.event.pageY - 50,
                 id: e.node.key,
                 isLeaf: false
             }))
@@ -197,7 +198,7 @@ const DevelopConfigManage: React.FC<any> = () => {
             setRightClickTreeNodeMenuItemProps(state => ({
                 ...state,
                 pageX: e.event.pageX,
-                pageY: e.event.pageY,
+                pageY: e.event.pageY - 50,
                 id: e.node.key,
                 isLeaf: true
             }))
@@ -489,15 +490,20 @@ const DevelopConfigManage: React.FC<any> = () => {
             render: (_: any, record: ITableData) => {
                 const editable: boolean = isEditing(record);
                 return editable ?
-                    <Button type="primary" onClick={() => {
-                        saveRow(record.key)
-                    }}>保存</Button>
+                    <Fragment>
+                        <Button type="primary" onClick={() => {
+                            saveRow(record.key)
+                        }}>保存</Button>
+                        <Button type="link" onClick={() => {
+                            cancelField(record)
+                        }}>取消</Button>
+                    </Fragment>
                     :
                     <Fragment>
                         <Button onClick={() => {
                             editRow(record)
                         }}>编辑</Button>
-                        <Button type="link" onClick={() => {
+                        <Button danger={true} type="link" onClick={() => {
                             deleteField(record)
                         }}>删除</Button>
                     </Fragment>
@@ -523,6 +529,24 @@ const DevelopConfigManage: React.FC<any> = () => {
             }),
         };
     });
+
+    /**
+     * 取消
+     */
+    const cancelField = (record: any): void => {
+        if (record.id) {//说明是编辑，取消恢复原来的值即可
+            setTableProps(state => ({
+                ...state,
+            }))
+        } else { // 说明是新增的字段，取消删除该字段即可
+            const tableData = tableProps.dataSource.filter(item => item.index !== record.index);
+            setTableProps(state => ({
+                ...state,
+                dataSource: tableData
+            }))
+        }
+        setEditingKey("")
+    };
 
     /**
      * 删除字段
@@ -650,7 +674,8 @@ const DevelopConfigManage: React.FC<any> = () => {
                     selectedTreeKeys.length > 0 ?
                         <Fragment>
                             <div className="operateArea">
-                                <Button disabled={tableProps.dataSource.length > 0 ? false : true} type="primary"
+                                <Button disabled={tableProps.dataSource.length > 0 && !editingKey ? false : true}
+                                        type="primary"
                                         onClick={saveField}>保存</Button>
                             </div>
                             <div className="tableWrapper">

@@ -1,34 +1,110 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import "./ProductsForm.less";
 import {Form, Input, InputNumber, Upload, Button, message} from "antd";
-import {UploadOutlined} from '@ant-design/icons';
+import {PlusOutlined} from '@ant-design/icons';
 import * as commonApi from "../../../../service/commonApi";
 import {ICreateDataProps} from "../../../../service/interface";
 import _ from "lodash";
+import CzModal from "../../../../components/CzModal/CzModal";
+import {ITableDataProps} from "../../types";
 
 interface IProps {
-    modalOnOk: () => void
+    modalOnOk: () => void;
+    formData: ITableDataProps;
 }
 
 const {Item, useForm} = Form;
 const uploadUrl = (window as any).urlConfig.uploadUrl;
+const filePreviewUrl = (window as any).urlConfig.filePreviewUrl;
 const ProductsForm: React.FC<IProps> = (props) => {
     const [form] = useForm();
+    const [uploadProps, setUploadProps] = useState({
+        previewVisible: false,
+        previewImage: '',
+        previewTitle: '',
+        fileList: [] as any,
+    });
+
+    useEffect(() => {
+        const keyData = Object.keys(props.formData);
+        if (keyData.length > 0) {
+            form.setFieldsValue({
+                name: props.formData.name,
+                price: props.formData.price,
+                image: props.formData.image
+            });
+            const imageArr = props.formData.image?.split(',').map((item: string, index: number) => ({
+                uid: `-${index}`,
+                name: item,
+                status: 'done',
+                url: `${filePreviewUrl}/${item}`
+            }));
+            console.log(imageArr)
+            setUploadProps(state => ({
+                ...state,
+                fileList: imageArr ? imageArr : [] as any
+            }))
+        }
+    }, [])
     const onFinish = _.debounce(async (values: any): Promise<void> => {
-        console.log(values)
+
+        const imageArr = typeof values.image == 'string' ? values.image : values.image.fileList.map((item: any) => item.response ? item.response.appData : item.name);
         const reqBody: ICreateDataProps = {
             tableName: 'products',
-            updateList: [{name: values.name, price: values.price}]
+            updateList: [
+                {
+                    ...values,
+                    image: typeof values.image == 'string' ? values.image : imageArr.join(','),
+                    id: props.formData.id
+                }
+            ]
         };
         const result = await commonApi.commonCreateData(reqBody);
+
         if (result) {
-            message.success('新增成功');
+            message.success('保存成功');
             props.modalOnOk();
         }
     }, 3000, {
         leading: true,
         trailing: false
     });
+
+    const uploadOnChange = (info: any): void => {
+        if (info.file.status !== 'uploading') {
+            console.log(info.file, info.fileList);
+        }
+        if (info.file.status === 'done') {
+            message.success(`${info.file.name} 上传成功`);
+            console.log(info, '上传的文件');
+        } else if (info.file.status === 'error') {
+            message.error(`${info.file.name} 上传失败`);
+        }
+        setUploadProps(state => ({
+            ...state,
+            fileList: info.fileList
+        }))
+    };
+
+    const picturePreview = async (file: any) => {
+        setUploadProps((state => ({
+            ...state,
+            previewVisible: true,
+            previewImage: file.url || `${filePreviewUrl}/${file.response.appData}`,
+            previewTitle: file.name || file.url.substring(file.url.lastIndexOf('/') + 1),
+        })))
+    };
+
+    const modalOk = (): void => {
+
+    };
+
+    const modalCancel = (): void => {
+        setUploadProps(state => ({
+            ...state,
+            previewVisible: false
+        }))
+    };
 
     return (
         <div className="cz-productsForm">
@@ -68,10 +144,10 @@ const ProductsForm: React.FC<IProps> = (props) => {
                 <Item
                     label="产品图片"
                     name="image"
-                    required={false}
+                    required={true}
                     rules={[
                         {
-                            required: false,
+                            required: true,
                             message: '产品图片必填'
                         }
                     ]}
@@ -79,22 +155,34 @@ const ProductsForm: React.FC<IProps> = (props) => {
                 >
                     <Upload
                         action={`${uploadUrl}/fileUpload`}
-                        data={(obj) => {
-                            console.log(obj)
-                        }}
-                        fileList={[]}
+                        fileList={uploadProps.fileList}
                         headers={{
                             access_token: window.sessionStorage.getItem("access_token") as string
                         }}
-                        listType="picture"
+                        listType="picture-card"
+                        onChange={uploadOnChange}
+                        onPreview={picturePreview}
                     >
-                        <Button><UploadOutlined/>点击上传</Button>
+                        <div>
+                            <PlusOutlined style={{marginBottom: '8px'}}/>
+                            <div style={{color: '#666'}}>点击上传</div>
+                        </div>
                     </Upload>
                 </Item>
                 <Item style={{textAlign: 'right'}}>
                     <Button type="primary" htmlType="submit">确定</Button>
                 </Item>
             </Form>
+
+            <CzModal
+                visible={uploadProps.previewVisible}
+                title={uploadProps.previewTitle}
+                onOk={modalOk}
+                onCancel={modalCancel}
+                footer={null}
+            >
+                <img style={{width: '100%'}} src={uploadProps.previewImage} alt=""/>
+            </CzModal>
         </div>
     )
 };

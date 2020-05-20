@@ -1,12 +1,13 @@
 import React, {Fragment, useEffect, useState} from "react";
 import "./Products.less";
 import CzTable from "../../components/CzTable/CzTable";
-import {IProductsTableProps, IProductsFormModalProps} from "./types";
+import {IProductsTableProps, IProductsFormModalProps, ITableDataProps} from "./types";
 import ProductsForm from "./components/ProductsForm/ProductsForm";
 import CzModal from "../../components/CzModal/CzModal";
-import {Button} from "antd";
+import {Button, message, Modal} from "antd";
 import * as commonApi from "../../service/commonApi";
 import {IQueryProps} from "../../service/interface";
+import {FormOutlined, DeleteOutlined} from "@ant-design/icons/lib";
 
 const Products: React.FC = () => {
     const [tableProps, setTableProps] = useState<IProductsTableProps>({
@@ -15,6 +16,7 @@ const Products: React.FC = () => {
                 dataIndex: "index",
                 title: "序号",
                 width: 80,
+                render: (_: any, record: ITableDataProps, index: number) => index + 1
             },
             {
                 dataIndex: "name",
@@ -34,15 +36,19 @@ const Products: React.FC = () => {
             {
                 dataIndex: "operate",
                 title: "操作",
-                fixed:'right',
-                align:"center",
+                fixed: 'right',
+                align: "center",
                 width: 140,
-                render: () => {
+                render: (_: any, record: ITableDataProps, index: number) => {
                     return (
-                        <Fragment>
-                            <Button>编辑</Button>
-                            <Button>删除</Button>
-                        </Fragment>
+                        <div style={{display: 'flex', justifyContent: 'center'}}>
+                            <FormOutlined style={{fontSize: '20px', color: '#49B0ff'}} onClick={() => {
+                                editData(record);
+                            }}/>
+                            <DeleteOutlined style={{fontSize: '20px', color: '#ff4d4f',marginLeft:'10px'}} onClick={() => {
+                                deleteData(record);
+                            }}/>
+                        </div>
                     )
                 }
             },
@@ -50,10 +56,7 @@ const Products: React.FC = () => {
 
         ],
         dataSource: [],
-        paginationProps: {
-            current: 1,
-            pageSize: 10,
-        },
+        paginationProps: true,
         loading: true,
         selectedRowKeys: [],
 
@@ -61,11 +64,52 @@ const Products: React.FC = () => {
     const [productsFormModalProps, setProductsFormModalProps] = useState<IProductsFormModalProps>({
         title: '新增产品',
         visible: false,
+        data: {} as ITableDataProps
     });
 
     useEffect((): void => {
         getTableData();
     }, []);
+
+    /**
+     * 编辑数据
+     * @param record
+     */
+    const editData = (record: ITableDataProps): void => {
+        setProductsFormModalProps(state => ({
+            ...state,
+            visible: true,
+            data: record,
+            title: '编辑产品',
+        }))
+    };
+
+    /**
+     * 单个删除数据
+     * @param record
+     */
+    const deleteData = (record: ITableDataProps): void => {
+        console.log(record)
+        Modal.confirm({
+            title: '系统提示',
+            content: '确定要删除该条数据么？',
+            onOk: async () => {
+                const reqBody = {
+                    tableName: 'products',
+                    deleteList: [
+                        {
+                            id: record.id
+                        }
+                    ]
+                }
+                const data = await commonApi.commonDelete(reqBody);
+                if (data) {
+                    message.success("删除成功");
+                    getTableData();
+                }
+            }
+        })
+    };
 
     const getTableData = async (): Promise<void> => {
         const reqBody: IQueryProps = {
@@ -103,14 +147,39 @@ const Products: React.FC = () => {
     const openModal = (): void => {
         setProductsFormModalProps(state => ({
             ...state,
-            visible: true
+            visible: true,
+            data: {} as ITableDataProps,
+            title: '新增产品',
         }))
     };
 
     /**
      * 删除
      */
-    const remove = async (): Promise<void> => {
+    const remove = (): void => {
+        Modal.confirm({
+            title: '系统提示',
+            content: '确定删除选中的数据么？',
+            onOk: async (): Promise<void> => {
+                type deleteProps = {
+                    id: number;
+                }
+                const deleteData = tableProps.selectedRowKeys?.map(item => ({id: item}));
+
+                const data = await commonApi.commonDelete({
+                    tableName: 'products',
+                    deleteList: deleteData as deleteProps[]
+                });
+                if (data) {
+                    message.success("删除成功");
+                    setTableProps(state => ({
+                        ...state,
+                        selectedRowKeys: []
+                    }))
+                    getTableData();
+                }
+            }
+        })
 
     };
 
@@ -136,7 +205,7 @@ const Products: React.FC = () => {
                     columns={tableProps.columns}
                     dataSource={tableProps.dataSource}
                     rowKey={record => record.id}
-                    pagination={tableProps.paginationProps}
+                    // pagination={tableProps.paginationProps}
                     loading={tableProps.loading}
                     rowSelection={{
                         selectedRowKeys: tableProps.selectedRowKeys,
@@ -155,7 +224,7 @@ const Products: React.FC = () => {
             >
                 <ProductsForm
                     modalOnOk={modalOnOk}
-
+                    formData={productsFormModalProps.data}
                 />
             </CzModal>
         </div>

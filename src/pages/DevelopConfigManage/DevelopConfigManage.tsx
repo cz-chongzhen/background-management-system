@@ -503,9 +503,14 @@ const DevelopConfigManage: React.FC<any> = () => {
                         <Button onClick={() => {
                             editRow(record)
                         }}>编辑</Button>
-                        <Button danger={true} type="link" onClick={() => {
-                            deleteField(record)
-                        }}>删除</Button>
+                        {
+                            record.fieldName === "id" || record.fieldName === "creator" ||  record.fieldName === "createDateTime" || record.fieldName === "editor" || record.fieldName === "editDateTime" ?
+                                null
+                                :
+                                <Button danger={true} type="link" onClick={() => {
+                                    deleteField(record)
+                                }}>删除</Button>
+                        }
                     </Fragment>
             }
         }

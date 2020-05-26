@@ -7,6 +7,7 @@ import {ICreateDataProps} from "../../../../service/interface";
 import _ from "lodash";
 import CzModal from "../../../../components/CzModal/CzModal";
 import {ITableDataProps} from "../../types";
+import dayjs from "dayjs";
 
 interface IProps {
     modalOnOk: () => void;
@@ -59,6 +60,8 @@ const ProductsForm: React.FC<IProps> = (props) => {
                 }
             ]
         };
+
+        console.log(reqBody,'请求参数')
         const result = await commonApi.commonCreateData(reqBody);
 
         if (result) {

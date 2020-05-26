@@ -1,9 +1,10 @@
-import React from 'react';
+import React, {useReducer} from 'react';
 import ReactDOM from 'react-dom';
 import './index.less';
 import {ConfigProvider} from "antd";
 import zhCN from 'antd/es/locale/zh_CN';
 import AppRouter from "./routers/AppRouter";
+import {initialState, reducer} from "./reducer";
 
 
 declare const ButtonSizeTypes: ["small", "middle", "large"];
@@ -30,13 +31,23 @@ if (_small) {
     buttonSize = "small";
 }
 
+export const AppContext: React.Context<any> = React.createContext({});
+const {Provider} = AppContext;
 
-ReactDOM.render(
-    <ConfigProvider
-        componentSize={buttonSize}
-        locale={zhCN}
-    >
-        <AppRouter/>
-    </ConfigProvider>,
-    document.getElementById('root'));
+const App = () => {
+    const store = useReducer(reducer, initialState);
+    return (
+        <Provider value={store}>
+            <ConfigProvider
+                componentSize={buttonSize}
+                locale={zhCN}
+            >
+                <AppRouter/>
+            </ConfigProvider>
+        </Provider>
+    )
+};
+
+
+ReactDOM.render(<App/>, document.getElementById('root'));
 

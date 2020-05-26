@@ -1,0 +1,1 @@
+export const getLoginUserInfo: string = "login/getLoginUserInfo";

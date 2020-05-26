@@ -1,10 +1,10 @@
-import React, {useState} from "react";
+import React, {useContext, useState} from "react";
 import "./Login.less";
 import {Spin, Form, Button, Input, message} from "antd";
 import {UserOutlined, LockOutlined} from '@ant-design/icons';
 import {useHistory} from "react-router-dom";
 import {czLogin} from "../../service/commonApi";
-import {ILoginReturnProps} from "./types/interface";
+// import {ILoginReturnProps} from "./types/interface";
 
 const FormItem = Form.Item;
 
@@ -25,17 +25,21 @@ const Login: React.FC<{}> = () => {
             const data = await czLogin(values);
 
             if (data) {
-                const {access_token, user} = data;
+                const {access_token} = data;
                 window.sessionStorage.setItem("access_token", access_token);
                 setSpinProps(state => ({
                     ...state,
                     spinning: true
                 }));
-                history.push("/basic", {value: "惠思雨"})
+                history.push("/basic");
             }
 
         } catch (e) {
             message.error(`错误：${e}`)
+            setSpinProps(state => ({
+                ...state,
+                spinning: false
+            }));
         }
 
     };

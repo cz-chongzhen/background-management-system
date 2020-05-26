@@ -13,6 +13,13 @@ export const czLogin = (reqBody: ILoginProps): any => {
 };
 
 /**
+ * 获取当前登录用户信息
+ */
+export const getLoginUserInfo = (): any => {
+    return czHttp.get(`${commonUrl}/common/currentUserInfo`);
+};
+
+/**
  * 注册方法
  * @param reqBody
  */

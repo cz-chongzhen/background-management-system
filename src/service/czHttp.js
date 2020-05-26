@@ -41,6 +41,11 @@ czHttp.interceptors.response.use(({data, status}) => {
     }
 }, error => {
     console.error(error.response, '调用方法出错了')
+    console.log(error.response.status)
+    if(error.response.status === 401){
+        message.error("token已过期");
+        window.location.href = "/login";
+    }
     // throw new Error(error);
 });
 

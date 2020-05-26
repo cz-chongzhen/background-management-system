@@ -4,12 +4,12 @@ export interface ITableDataProps {
     index: number;
     id: number;
     name: string;
-    createDateTime?: string;
-    creator?: number;
-    editDateTime?: string;
+    createDateTime: string;
+    creator: number;
+    editDateTime: string;
     price: number;
     image: string;
-    editor?: number;
+    editor: number;
 }
 
 export interface IProductsTableProps {
